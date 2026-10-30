@@ -1,0 +1,8 @@
+# MicroLink - Archivos que NO se suben a GitHub
+
+# Base de datos local (se recrea sola al ejecutar: python app.py)
+microlink.db
+
+# Archivos compilados de Python
+__pycache__/
+*.pyc

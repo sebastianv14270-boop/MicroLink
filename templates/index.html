@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MicroLink | Monitor de Micro:bits</title>
+
+    <!-- Hoja de estilos principal -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<!-- =========================================================
+     ICONOS (SVG en un solo bloque, se reutilizan en todo sitio)
+========================================================== -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+    <symbol id="i-home" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h5v-6h4v6h5V9.5"/>
+    </symbol>
+    <symbol id="i-bell" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>
+    </symbol>
+    <symbol id="i-list" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M9 6h12M9 12h12M9 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>
+    </symbol>
+    <symbol id="i-cpu" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <rect x="6" y="6" width="12" height="12" rx="2.5"/><rect x="10" y="10" width="4" height="4" rx="1"/>
+        <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/>
+    </symbol>
+    <symbol id="i-chart" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M4 20V11M10 20V4M16 20v-6M22 20H2"/>
+    </symbol>
+    <symbol id="i-thermo" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0z"/><path d="M12 9.5v5"/>
+    </symbol>
+    <symbol id="i-shield" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/>
+    </symbol>
+    <symbol id="i-xc" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"/><path d="M15 9l-6 6M9 9l6 6"/>
+    </symbol>
+    <symbol id="i-check" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M20 6 9 17l-5-5"/>
+    </symbol>
+    <symbol id="i-x" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M18 6 6 18M6 6l12 12"/>
+    </symbol>
+    <symbol id="i-clock" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+    </symbol>
+    <symbol id="i-arrow" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M5 12h14M13 6l6 6-6 6"/>
+    </symbol>
+    <symbol id="i-radio" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M5 12.5a10 10 0 0 1 14 0"/><path d="M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.2" r="1.2"/>
+    </symbol>
+    <symbol id="i-monitor" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>
+    </symbol>
+    <symbol id="i-search" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+    </symbol>
+    <symbol id="i-refresh" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/>
+    </symbol>
+    <symbol id="i-plug" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M9 2v6M15 2v6"/><path d="M6 8h12v3a6 6 0 0 1-6 6 6 6 0 0 1-6-6V8z"/><path d="M12 17v5"/>
+    </symbol>
+    <symbol id="i-info" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/>
+    </symbol>
+    <symbol id="i-flask" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+        <path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/>
+        <path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/>
+    </symbol>
+</svg>
+
+<!-- =========================================================
+     MENÚ LATERAL FIJO
+========================================================== -->
+<aside class="sidebar">
+    <div class="logo">
+        <div class="logo-icono" id="logo-icono">
+            <span></span><span></span><span></span><span></span>
+        </div>
+        <div class="logo-texto">
+            <h1>MicroLink</h1>
+            <p>Monitor de Micro:bits</p>
+        </div>
+    </div>
+
+    <nav class="menu">
+        <button class="menu-item active" data-modulo="dashboard">
+            <svg class="menu-icono"><use href="#i-home"/></svg>
+            <span>Inicio</span>
+        </button>
+        <button class="menu-item" data-modulo="alertas">
+            <svg class="menu-icono"><use href="#i-bell"/></svg>
+            <span>Alertas</span>
+        </button>
+        <button class="menu-item" data-modulo="historial">
+            <svg class="menu-icono"><use href="#i-list"/></svg>
+            <span>Historial</span>
+        </button>
+        <button class="menu-item" data-modulo="dispositivos">
+            <svg class="menu-icono"><use href="#i-cpu"/></svg>
+            <span>Dispositivos</span>
+        </button>
+        <button class="menu-item" data-modulo="graficas">
+            <svg class="menu-icono"><use href="#i-chart"/></svg>
+            <span>Gráficas</span>
+        </button>
+    </nav>
+
+    <!-- Estado general del sistema -->
+    <div class="sidebar-estado" id="sidebar-estado">
+        <span class="punto punto-off" id="estado-punto"></span>
+        <div>
+            <strong id="estado-titulo">Verificando sistema</strong>
+            <span id="estado-sub">Comprobando receptor USB…</span>
+        </div>
+    </div>
+</aside>
+
+<!-- =========================================================
+     CONTENIDO PRINCIPAL
+========================================================== -->
+<main class="contenido">
+
+    <!-- Barra superior -->
+    <header class="topbar">
+        <div class="pill-estado" id="pill-usb">
+            <span class="punto punto-off" id="pill-punto"></span>
+            <span id="pill-texto">Verificando receptor USB…</span>
+        </div>
+
+        <div class="topbar-derecha">
+            <!-- Botón para entrar al Modo Demostración (datos simulados) -->
+            <button class="btn-demo" id="btn-modo-demo">
+                <svg class="btn-demo-icono"><use href="#i-flask"/></svg>
+                <span>MODO DEMO</span>
+            </button>
+
+            <!-- Botón para escanear los puertos COM del computador -->
+            <button class="btn-buscar" id="btn-buscar-top">
+                <svg class="btn-buscar-icono"><use href="#i-search"/></svg>
+                <span>Buscar receptor</span>
+            </button>
+
+            <!-- Aviso de datos de demostración (se oculta con hardware real) -->
+            <div class="aviso-demo" id="aviso-demo">
+                <span class="punto punto-demo"></span>
+                DATOS DE DEMOSTRACIÓN
+            </div>
+
+            <div class="reloj">
+                <span id="fecha-hoy">—</span>
+                <strong id="hora-actual">—</strong>
+            </div>
+        </div>
+    </header>
+
+    <!-- =====================================================
+         MÓDULO 1: DASHBOARD (INICIO)
+    ====================================================== -->
+    <section class="modulo activo" id="modulo-dashboard">
+
+        <!-- Encabezado visual con los dos Micro:bit -->
+        <div class="hero">
+            <div class="hero-equipos">
+                <div class="equipo">
+                    <img class="equipo-img emisor" src="{{ url_for('static', filename='img/microbit-emisor.png') }}" alt="Micro:bit emisor">
+                    <div class="equipo-pill">
+                        <strong>Emisor</strong>
+                        <span>USR_01</span>
+                    </div>
+                </div>
+
+                <!-- Ondas de datos que fluyen del emisor al receptor -->
+                <svg class="hero-ondas" viewBox="0 0 240 150" preserveAspectRatio="none" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="g-onda-1" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#60a5fa"/>
+                            <stop offset="55%" stop-color="#a78bfa"/>
+                            <stop offset="100%" stop-color="#f472b6"/>
+                        </linearGradient>
+                        <linearGradient id="g-onda-2" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0%" stop-color="#38bdf8"/>
+                            <stop offset="55%" stop-color="#818cf8"/>
+                            <stop offset="100%" stop-color="#22d3ee"/>
+                        </linearGradient>
+                    </defs>
+                    <path class="onda-base" d="M0 52 C 80 18, 160 92, 240 58"/>
+                    <path class="onda-base" d="M0 98 C 80 64, 160 138, 240 104"/>
+                    <path class="onda fluir" stroke="url(#g-onda-1)" d="M0 52 C 80 18, 160 92, 240 58"/>
+                    <path class="onda fluir retraso" stroke="url(#g-onda-2)" d="M0 98 C 80 64, 160 138, 240 104"/>
+                </svg>
+
+                <div class="equipo">
+                    <img class="equipo-img receptor" src="{{ url_for('static', filename='img/microbit-receptor.png') }}" alt="Micro:bit receptor">
+                    <div class="equipo-pill">
+                        <strong>Receptor</strong>
+                        <span class="linea" id="hero-receptor">
+                            <i class="punto punto-off"></i> Sin USB
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-texto">
+                <h2>Conectando ideas<br>con el mundo real</h2>
+                <p>Monitoreo de temperatura y alertas en tiempo real
+                   mediante comunicación por radio entre micro:bits.</p>
+                <span class="hero-subrayado"></span>
+            </div>
+        </div>
+
+        <!-- Tarjetas de resumen (KPI) -->
+        <div class="kpis">
+            <div class="kpi">
+                <div class="kpi-icono azul"><svg><use href="#i-thermo"/></svg></div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Temperatura Actual</span>
+                    <span class="kpi-valor" id="kpi-temp">-- °C</span>
+                    <span class="kpi-sub" id="kpi-temp-sub">Esperando registros…</span>
+                </div>
+            </div>
+
+            <div class="kpi">
+                <div class="kpi-icono rojo"><svg><use href="#i-bell"/></svg></div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Última Alerta</span>
+                    <span class="kpi-valor" id="kpi-alerta">--</span>
+                    <span class="kpi-sub" id="kpi-alerta-sub">Sin alertas</span>
+                </div>
+            </div>
+
+            <div class="kpi">
+                <div class="kpi-icono verde"><svg><use href="#i-shield"/></svg></div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Mensajes Válidos</span>
+                    <span class="kpi-valor" id="kpi-validos">0</span>
+                    <span class="kpi-sub">Total acumulado</span>
+                </div>
+            </div>
+
+            <div class="kpi">
+                <div class="kpi-icono rosa"><svg><use href="#i-xc"/></svg></div>
+                <div class="kpi-info">
+                    <span class="kpi-label">Mensajes Rechazados</span>
+                    <span class="kpi-valor" id="kpi-rechazados">0</span>
+                    <span class="kpi-sub">Total acumulado</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gráfica + alertas en vivo -->
+        <div class="grid-2-1">
+            <div class="panel">
+                <div class="panel-cabecera">
+                    <div class="panel-titulo">
+                        <div class="panel-icono azul"><svg><use href="#i-thermo"/></svg></div>
+                        <div>
+                            <h3>Temperatura en Tiempo Real</h3>
+                            <p>Últimos registros recibidos desde la micro:bit</p>
+                        </div>
+                    </div>
+                    <select class="select-rango" data-rango aria-label="Rango de tiempo">
+                        <option value="10">Últimos 10 minutos</option>
+                        <option value="30">Últimos 30 minutos</option>
+                        <option value="0">Todo el historial</option>
+                    </select>
+                </div>
+                <div class="grafica-caja">
+                    <canvas id="grafica-dashboard"></canvas>
+                </div>
+            </div>
+
+            <div class="panel panel-alertas">
+                <div class="panel-cabecera">
+                    <div class="panel-titulo">
+                        <div class="panel-icono lila"><svg><use href="#i-bell"/></svg></div>
+                        <div><h3>Alertas en Tiempo Real</h3></div>
+                    </div>
+                    <span class="pill-vivo"><i class="punto punto-vivo"></i> En vivo</span>
+                </div>
+                <div class="lista-viva" id="lista-alertas-live"></div>
+                <p class="vacio" id="live-vacio" hidden>No hay alertas registradas.</p>
+            </div>
+        </div>
+
+        <!-- Historial + dispositivos -->
+        <div class="grid-2-1">
+            <div class="panel">
+                <div class="panel-cabecera">
+                    <div class="panel-titulo">
+                        <div class="panel-icono lila"><svg><use href="#i-clock"/></svg></div>
+                        <div><h3>Historial de Mensajes</h3></div>
+                    </div>
+                    <button class="btn-flecha" data-ir="historial">
+                        Ver todos <svg><use href="#i-arrow"/></svg>
+                    </button>
+                </div>
+                <div class="tabla-caja">
+                    <table class="tabla" id="tabla-dashboard">
+                        <thead>
+                            <tr>
+                                <th>#</th><th>Fecha Hora</th><th>ID Emisor</th>
+                                <th>Tipo</th><th>Valor</th><th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-cabecera">
+                    <div class="panel-titulo">
+                        <div class="panel-icono azul"><svg><use href="#i-cpu"/></svg></div>
+                        <div><h3>Dispositivos</h3></div>
+                    </div>
+                </div>
+                <div class="mini-dispositivos" id="dispositivos-mini"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         MÓDULO 2: ALERTAS
+    ====================================================== -->
+    <section class="modulo" id="modulo-alertas">
+        <div class="panel">
+            <div class="panel-cabecera">
+                <div class="panel-titulo">
+                    <div class="panel-icono lila"><svg><use href="#i-bell"/></svg></div>
+                    <div>
+                        <h3>Alertas recibidas</h3>
+                        <p>Mensajes transmitidos por el micro:bit emisor</p>
+                    </div>
+                </div>
+                <div class="filtros">
+                    <button class="chip activo" data-filtro-alertas="todas">Todas</button>
+                    <button class="chip" data-filtro-alertas="VALIDO">Válidas</button>
+                    <button class="chip" data-filtro-alertas="RECHAZADO">Rechazadas</button>
+                </div>
+            </div>
+            <div class="lista-viva lista-grande" id="grid-alertas"></div>
+            <p class="vacio" id="alertas-vacio" hidden>No hay alertas registradas.</p>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         MÓDULO 3: HISTORIAL
+    ====================================================== -->
+    <section class="modulo" id="modulo-historial">
+        <div class="panel">
+            <div class="panel-cabecera">
+                <div class="panel-titulo">
+                    <div class="panel-icono lila"><svg><use href="#i-clock"/></svg></div>
+                    <div>
+                        <h3>Historial de mensajes</h3>
+                        <p>Registro completo de mensajes válidos y rechazados</p>
+                    </div>
+                </div>
+                <div class="filtros">
+                    <button class="chip activo" data-filtro-historial="TODOS">Todos</button>
+                    <button class="chip" data-filtro-historial="VALIDO">Válidos</button>
+                    <button class="chip" data-filtro-historial="RECHAZADO">Rechazados</button>
+                </div>
+            </div>
+            <div class="tabla-caja">
+                <table class="tabla" id="tabla-historial">
+                    <thead>
+                        <tr>
+                            <th>N°</th><th>Fecha y hora</th><th>ID del emisor</th>
+                            <th>Tipo de mensaje</th><th>Valor</th><th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <p class="vacio" id="historial-vacio" hidden>No hay mensajes registrados.</p>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         MÓDULO 4: DISPOSITIVOS
+    ====================================================== -->
+    <section class="modulo" id="modulo-dispositivos">
+
+        <!-- Escaneo de puertos COM (Buscar receptor) -->
+        <div class="panel panel-buscar">
+            <div class="panel-cabecera">
+                <div class="panel-titulo">
+                    <div class="panel-icono azul"><svg><use href="#i-search"/></svg></div>
+                    <div>
+                        <h3>Buscar receptor USB</h3>
+                        <p>Escanea los puertos COM del computador para encontrar el micro:bit receptor</p>
+                    </div>
+                </div>
+                <button class="btn-buscar" id="btn-buscar-disp">
+                    <svg class="btn-buscar-icono"><use href="#i-refresh"/></svg>
+                    <span>Escanear</span>
+                </button>
+            </div>
+
+            <div class="nota-buscar">
+                <svg><use href="#i-info"/></svg>
+                <span>
+                    Este escaneo detecta lo que está conectado <strong>por USB</strong> al computador
+                    (micro:bit, Arduino y clones compatibles). El enlace de
+                    <strong>radio 2.4 GHz</strong> entre los dos micro:bits es invisible para el PC:
+                    lo único que se puede verificar desde aquí es la conexión USB del receptor.
+                </span>
+            </div>
+
+            <div class="lista-serial" id="lista-serial">
+                <p class="vacio">Presiona "Escanear" para buscar dispositivos conectados por USB.</p>
+            </div>
+        </div>
+
+        <div class="dispositivos-grid">
+
+            <!-- Micro:bit emisor -->
+            <article class="card-dispositivo">
+                <div class="card-cabecera">
+                    <img src="{{ url_for('static', filename='img/microbit-emisor.png') }}" alt="Micro:bit emisor">
+                    <div>
+                        <h3>USR_01</h3>
+                        <p>Micro:bit Emisor</p>
+                    </div>
+                    <span class="pill pill-neutral">Radio</span>
+                </div>
+                <ul class="datos-dispositivo">
+                    <li><span>Identificador</span><strong>USR_01</strong></li>
+                    <li><span>Función</span><strong>Transmisión de datos</strong></li>
+                    <li><span>Variable enviada</span><strong>Temperatura</strong></li>
+                    <li><span>Medio de envío</span><strong>Radiofrecuencia 2.4 GHz</strong></li>
+                </ul>
+                <div class="card-stats">
+                    <div>
+                        <span>Último valor</span>
+                        <strong id="disp-emisor-valor">--</strong>
+                    </div>
+                    <div>
+                        <span>Última señal</span>
+                        <strong id="disp-emisor-senal">Sin datos</strong>
+                    </div>
+                </div>
+                <p class="nota">El emisor no está conectado por USB: su estado general
+                    no puede verificarse desde esta aplicación.</p>
+            </article>
+
+            <!-- Micro:bit receptor -->
+            <article class="card-dispositivo">
+                <div class="card-cabecera">
+                    <img src="{{ url_for('static', filename='img/microbit-receptor.png') }}" alt="Micro:bit receptor">
+                    <div>
+                        <h3>Receptor</h3>
+                        <p>Micro:bit Receptor</p>
+                    </div>
+                    <span class="pill" id="disp-pill"><i class="punto punto-off"></i> Sin USB</span>
+                </div>
+                <ul class="datos-dispositivo">
+                    <li><span>Función</span><strong>Recepción y validación</strong></li>
+                    <li><span>Clave compartida</span><strong>Comprobación básica</strong></li>
+                    <li><span>Conexión USB</span><strong id="disp-usb">--</strong></li>
+                    <li><span>Último mensaje</span><strong id="disp-ultimo">Sin datos</strong></li>
+                </ul>
+                <div class="card-stats">
+                    <div>
+                        <span>Último resultado</span>
+                        <strong id="disp-resultado">Sin datos</strong>
+                    </div>
+                    <div>
+                        <span>Mensajes registrados</span>
+                        <strong id="disp-total">0</strong>
+                    </div>
+                </div>
+                <div class="barra-estado" id="disp-barra">
+                    <i class="punto punto-off"></i>
+                    <span id="disp-barra-texto">Verificando conexión…</span>
+                </div>
+            </article>
+        </div>
+    </section>
+
+    <!-- =====================================================
+         MÓDULO 5: GRÁFICAS
+    ====================================================== -->
+    <section class="modulo" id="modulo-graficas">
+        <div class="panel">
+            <div class="panel-cabecera">
+                <div class="panel-titulo">
+                    <div class="panel-icono azul"><svg><use href="#i-thermo"/></svg></div>
+                    <div>
+                        <h3>Temperatura registrada</h3>
+                        <p>Actualización automática cada pocos segundos</p>
+                    </div>
+                </div>
+                <select class="select-rango" data-rango aria-label="Rango de tiempo">
+                    <option value="10">Últimos 10 minutos</option>
+                    <option value="30">Últimos 30 minutos</option>
+                    <option value="0">Todo el historial</option>
+                </select>
+            </div>
+            <div class="grafica-caja grafica-grande">
+                <canvas id="grafica-temperatura"></canvas>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<!-- =========================================================
+     POPUP DE CONFIRMACIÓN DEL MODO DEMO
+     Aviso al usuario de que los datos serán simulados
+========================================================== -->
+<div class="modal-demo" id="modal-demo" hidden>
+    <div class="modal-demo-caja" role="alertdialog" aria-modal="true"
+         aria-labelledby="modal-demo-titulo" aria-describedby="modal-demo-texto">
+        <div class="modal-demo-icono"><svg><use href="#i-flask"/></svg></div>
+        <h3 id="modal-demo-titulo">Entrar al Modo Demo</h3>
+        <p id="modal-demo-texto">
+            Al entrar al Modo Demo, los datos que se muestran serán genéricos
+            y simulativos: la interfaz generará por su cuenta mensajes, alertas
+            y temperaturas de ejemplo.
+        </p>
+        <ul class="modal-demo-lista" id="modal-demo-lista">
+            <li>Los valores NO provienen del Micro:bit ni de la base de datos.</li>
+            <li>Se mostrará el aviso «DATOS DE DEMOSTRACIÓN» en la barra superior.</li>
+            <li>Si hay un receptor conectado, sus datos reales dejarán de verse hasta que salgas del modo.</li>
+            <li>Puedes salir en cualquier momento volviendo a pulsar MODO DEMO.</li>
+        </ul>
+        <div class="modal-demo-acciones">
+            <button class="modal-demo-btn secundario" id="modal-demo-cancelar">Cancelar</button>
+            <button class="modal-demo-btn principal" id="modal-demo-aceptar">Activar Modo Demo</button>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js local (funciona sin internet) -->
+<script src="{{ url_for('static', filename='js/chart.umd.js') }}"></script>
+<!-- Lógica de la aplicación -->
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
